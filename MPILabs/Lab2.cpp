@@ -1,12 +1,32 @@
-﻿// MPILabs.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
+﻿// MPILab2.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
 //
 
 #include "pch.h"
 #include <iostream>
+#include "mpi.h"
+using namespace std;
 
-int main()
+int mainn(int argc, char *argv[])
 {
-    std::cout << "Hello World!\n"; 
+	int rank, size, resultlen, value;
+	char name[MPI_MAX_PROCESSOR_NAME];
+
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Get_processor_name(name, &resultlen);
+
+	do
+	{
+		if (rank == 0) {
+			cin >> value;
+		}
+		//MPI_Barrier(MPI_COMM_WORLD);
+		MPI_Bcast(&value, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		cout << value << ' ' << rank << ' ' << name << endl;		
+	} while (value > 0);
+	MPI_Finalize();
+	return 0;
 }
 
 // Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
