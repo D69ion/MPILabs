@@ -8,7 +8,7 @@
 using namespace std;
 #define PmpiI25DT 3.141592653589793238462643
 
-int mainn(int argc, char *argv[])
+int mainq(int argc, char *argv[])
 {
 	int rank, rankc, resultlen, n = 1, i;
 	double result, h, sum, x, starttime;
