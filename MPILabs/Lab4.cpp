@@ -3,7 +3,7 @@
 #include "mpi.h"
 using namespace std;
 
-int main(int argc, char *argv[])
+int mainw(int argc, char *argv[])
 {
 	int rank, size, resultlen;
 	char name[MPI_MAX_PROCESSOR_NAME];
