@@ -6,7 +6,7 @@
 #include <windows.h>
 using namespace std;
 
-#define _CRT_SECURE_NO_WARNINGS
+#pragma warning(disable: 4996 )
 #define FILE_NAME "matrix.txt"
 #define MAX_N 12
 #define PROCESS_COUNT 4
@@ -25,26 +25,9 @@ int main(int argc, char **argv) {
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &process_count);
 
-	if (process_count != PROCESS_COUNT) {
-		cout << "Process count must be " << PROCESS_COUNT << endl;
-		//fflush(stdout);
-		MPI_Abort(MPI_COMM_WORLD, 1);
-	}
-
 	if (rank == ROOT_PROCESS) {
-		cout << "Current directory is ";
-		system("echo %cd%");
-		cout << endl;
-		//fflush(stdout);
-	}
-
-	if (rank == 0) {
 		FILE *file_pointer;
 		file_pointer = fopen(FILE_NAME, "r");
-		if (!file_pointer) {
-			cout << FILE_NAME << " not found" << endl;
-			MPI_Abort(MPI_COMM_WORLD, 1);
-		}
 		for (int i = MAX_N - 1; i >= 0; i--) {
 			for (int j = 0; j < MAX_N; j++) {
 				fscanf(file_pointer, "%lf", &x[i][j]);
@@ -70,11 +53,9 @@ int main(int argc, char **argv) {
 		}
 		if (rank > 0) {
 			MPI_Recv(xlocal[0], MAX_N, MPI_DOUBLE, rank - 1, 0, MPI_COMM_WORLD, &status);
-		}
-
-		if (rank > 0) {
 			MPI_Send(xlocal[1], MAX_N, MPI_DOUBLE, rank - 1, 1, MPI_COMM_WORLD);
 		}
+
 		if (rank < process_count - 1) {
 			MPI_Recv(xlocal[MAX_N / process_count + 1], MAX_N, MPI_DOUBLE, rank + 1, 1, MPI_COMM_WORLD, &status);
 		}
@@ -95,32 +76,22 @@ int main(int argc, char **argv) {
 
 		MPI_Allreduce(&diffnorm, &gdiffnorm, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-		gdiffnorm = sqrt(gdiffnorm);
+		gdiffnorm += gdiffnorm;
 
 		if (rank == ROOT_PROCESS) {
 			cout << "At iteration " << iterations_count << ", diff is " << gdiffnorm << endl;
-			//printf("At iteration %d, diff is %f\n", iterations_count, gdiffnorm);
-			//fflush(stdout);
 		}
 	} while (gdiffnorm > 0.01 && iterations_count < 100);
 
-
-	MPI_Gather(xlocal[1], MAX_N * (MAX_N / process_count), MPI_DOUBLE,
-		x, MAX_N * (MAX_N / process_count), MPI_DOUBLE,
-		0, MPI_COMM_WORLD);
-
+	MPI_Gather(xlocal[1], MAX_N * (MAX_N / process_count), MPI_DOUBLE, x, MAX_N * (MAX_N / process_count), MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
 	if (rank == ROOT_PROCESS) {
-		printf("Final solution is\n");
+		cout << "Final solution is" << endl;
 		for (int i = MAX_N - 1; i >= 0; i--) {
 			for (int j = 0; j < MAX_N; j++) {
 				cout << x[i][j] << ' ';
-				//printf("%e ", x[i][j]);
-				//fflush(stdout);
 			}
 			cout << endl;
-			//printf("\n");
-			//fflush(stdout);
 		}
 	}
 
