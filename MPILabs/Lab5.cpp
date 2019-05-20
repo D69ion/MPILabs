@@ -12,7 +12,7 @@ using namespace std;
 #define PROCESS_COUNT 4
 #define ROOT_PROCESS 0
 
-int main(int argc, char **argv) {
+int maine(int argc, char **argv) {
 	int rank, process_count, iterations_count = 0;
 	int first_row, last_row;
 	MPI_Status status;
